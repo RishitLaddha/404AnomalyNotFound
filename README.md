@@ -25,7 +25,7 @@ Datasets I will be using -
 
 ## Proposed Solution
 
-![Flowchart showing the 10 phases of building the Transformer-Based WAF](initial flowchart.png)
+![Flowchart showing the 10 phases of building the Transformer-Based WAF](flowchart.png)
 
 The solution is a Transformer-based Web Application Firewall that learns how normal web requests look and then detects requests that look different. The solution I am proposing extends beyond the base SIH problem statement and completes the full security pipeline required for a real-world Web Application Firewall.
 
