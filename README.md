@@ -92,14 +92,11 @@ This MCP is able to run terminal commands as well as interacting with web applic
 - `Dirb`
 - `enum4linux`
 - `gobuster`
-- `Hydra`
-- `John the Ripper`
-- `Metasploit-Framework`
 - `Nikto`
 - `Nmap`
 - `sqlmap`
 - `WPScan`
-- As well as being able to execute raw commands.
+- As well as being able to execute few raw commands.
 
 As a result, this is able to perform **AI-assisted penetration testing** and solving **CTF challenges** in real time.
 
@@ -115,10 +112,6 @@ The goal is to enable AI-driven offensive security testing by:
 - Allowing MCP apps to send custom requests (e.g. `curl`, `nmap`, `ffuf`, etc.) and receive structured outputs.
 
 Here are some examples (using Google's AI `gemini 2.0 flash`):
-
-### Example solving a web CTF challenge from RamadanCTF
-
-https://drive.google.com/file/d/1LhToW1X4DoJMRezhrJa-c-8nH__E6W-g/view?usp=share_link
 
 ### Trying to solve machine "code" from HTB
 
