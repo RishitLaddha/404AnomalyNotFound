@@ -3,6 +3,7 @@ services:
   - type: web
     name: pinnacle-waf-api
     runtime: python
+    plan: free
     buildCommand: pip install -r requirements.txt
     startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
     rootDir: backend
@@ -18,6 +19,7 @@ services:
   - type: web
     name: pinnacle-kali
     runtime: docker
+    plan: free
     rootDir: kali-server
     dockerfilePath: ./Dockerfile
     envVars:
