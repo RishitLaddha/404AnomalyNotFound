@@ -2,8 +2,12 @@
 
 import json
 from collections import Counter
-from model.config import DATA_PATH, VOCAB_PATH, PAD_TOKEN, UNK_TOKEN
 
+# Import from local config (same directory)
+import sys
+import os
+sys.path.insert(0, os.path.dirname(__file__))
+from config import DATA_PATH, VOCAB_PATH, PAD_TOKEN, UNK_TOKEN
 
 
 def build_vocab():

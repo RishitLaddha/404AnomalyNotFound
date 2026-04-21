@@ -1,0 +1,160 @@
+from locust import HttpUser, task, between, SequentialTaskSet
+import random
+import json
+
+class JuiceShopUserBehavior(SequentialTaskSet):
+    """Realistic e-commerce user journey"""
+    
+    def on_start(self):
+        """Initialize session and load homepage"""
+        # Homepage loads
+        self.client.get("/")
+        
+        # Socket.io connection
+        self.client.get("/socket.io/?EIO=4&transport=polling")
+        
+        # Load initial data
+        self.client.get("/rest/admin/application-configuration")
+        self.client.get("/api/Challenges/")
+        self.client.get("/rest/captcha/")
+        self.client.get("/api/Quantitys/")
+        
+        # Get products
+        response = self.client.get("/rest/products/search?q=")
+        try:
+            self.products = response.json().get('data', [])
+        except:
+            self.products = []
+    
+    @task(8)
+    def browse_products(self):
+        """Browse product catalog"""
+        # Various search queries
+        queries = ["", "apple", "juice", "lemon", "banana", "orange", "grape", "berry"]
+        self.client.get(f"/rest/products/search?q={random.choice(queries)}")
+    
+    @task(5)
+    def view_product_details(self):
+        """View individual product pages"""
+        if self.products:
+            product_id = random.choice(self.products).get('id', 1)
+        else:
+            product_id = random.randint(1, 20)
+        self.client.get(f"/api/Products/{product_id}")
+    
+    @task(4)
+    def view_product_reviews(self):
+        """Load product reviews"""
+        product_id = random.randint(1, 20)
+        self.client.get(f"/rest/products/{product_id}/reviews")
+    
+    @task(3)
+    def add_to_basket(self):
+        """Add items to shopping basket"""
+        product_id = random.randint(1, 20)
+        quantity = random.randint(1, 5)
+        
+        self.client.post("/api/BasketItems/", json={
+            "ProductId": product_id,
+            "BasketId": "1",
+            "quantity": quantity
+        })
+    
+    @task(2)
+    def view_basket(self):
+        """Check shopping basket"""
+        self.client.get("/rest/basket/1")
+    
+    @task(2)
+    def search_advanced(self):
+        """Advanced product searches"""
+        queries = [
+            "apple juice",
+            "organic",
+            "fresh",
+            "premium",
+            "special offer",
+            "sale"
+        ]
+        self.client.get(f"/rest/products/search?q={random.choice(queries)}")
+    
+    @task(2)
+    def check_challenges(self):
+        """View challenges/achievements"""
+        self.client.get("/api/Challenges/")
+    
+    @task(2)
+    def language_files(self):
+        """Load language resources"""
+        langs = ["en", "de", "es", "fr", "ja", "zh_CN"]
+        self.client.get(f"/assets/i18n/{random.choice(langs)}.json")
+    
+    @task(3)
+    def static_assets(self):
+        """Load static resources"""
+        assets = [
+            "/assets/public/favicon_js.ico",
+            "/assets/public/images/JuiceShop_Logo.png",
+            "/assets/public/images/products/apple_juice.jpg",
+            "/assets/public/images/products/banana_juice.jpg",
+            "/assets/public/images/products/carrot_juice.jpeg",
+            "/assets/public/images/products/lemon_juice.jpg",
+            "/main.js",
+            "/polyfills.js",
+            "/runtime.js",
+            "/styles.css",
+            "/vendor.js"
+        ]
+        self.client.get(random.choice(assets))
+    
+    @task(1)
+    def user_registration_page(self):
+        """Visit registration page"""
+        self.client.get("/#/register")
+    
+    @task(1)
+    def login_page(self):
+        """Visit login page"""
+        self.client.get("/#/login")
+    
+    @task(1)
+    def contact_page(self):
+        """Visit contact page"""
+        self.client.get("/#/contact")
+    
+    @task(1)
+    def about_page(self):
+        """Visit about page"""
+        self.client.get("/#/about")
+    
+    @task(1)
+    def track_order(self):
+        """Track order page"""
+        self.client.get("/#/track-result")
+    
+    @task(2)
+    def api_security_questions(self):
+        """Load security questions"""
+        self.client.get("/api/SecurityQuestions/")
+    
+    @task(1)
+    def api_delivery_methods(self):
+        """Check delivery options"""
+        self.client.get("/api/Deliverys/")
+    
+    @task(1)
+    def whoami_check(self):
+        """Check current user"""
+        self.client.get("/rest/user/whoami")
+    
+    @task(2)
+    def socket_polling(self):
+        """Maintain socket connection"""
+        self.client.get("/socket.io/?EIO=4&transport=polling")
+        self.client.post("/socket.io/?EIO=4&transport=polling", data="40")
+
+
+class JuiceShopUser(HttpUser):
+    host = "http://localhost:8082"
+    wait_time = between(0.3, 1.5)  # Fast traffic for quick data collection
+    tasks = [JuiceShopUserBehavior]

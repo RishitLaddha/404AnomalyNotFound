@@ -1,0 +1,29 @@
+{
+  "recommended_threshold": 1.5,
+  "threshold_95": 1.5,
+  "threshold_99": 1.8,
+  "score_stats": {
+    "mean": 2.6061293698295564e-09,
+    "std": 1.8237332020671075e-07,
+    "min": 0.0,
+    "max": 2.7296706321067177e-05
+  },
+  "model_config": {
+    "vocab_size": 87,
+    "d_model": 128,
+    "nhead": 4,
+    "num_enc_layers": 3,
+    "num_dec_layers": 3,
+    "dim_feedforward": 512,
+    "dropout": 0.3,
+    "max_seq_len": 12
+  },
+  "training": {
+    "epochs_run": 26,
+    "best_val_loss": 8.981081515761734e-09,
+    "initial_loss": 0.18258534867784296,
+    "final_loss": 1.951683028424253e-08,
+    "improvement_pct": 99.99998931084535
+  },
+  "note": "Manually set: 3.7x max benign score (0.000027). Attacks score 0.88-2.01"
+}

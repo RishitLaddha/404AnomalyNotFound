@@ -1,0 +1,91 @@
+from locust import HttpUser, task, between, SequentialTaskSet
+import random
+
+class WebGoatUserBehavior(SequentialTaskSet):
+    """SAFE WebGoat behavior - Navigation and learning only, NO attack payloads"""
+    
+    def on_start(self):
+        """Initialize WebGoat session - just browsing"""
+        # Load main page
+        self.client.get("/WebGoat/login", name="/WebGoat/login")
+        
+        # Simple registration (safe credentials)
+        username = f"student{random.randint(1000, 9999)}"
+        self.client.post("/WebGoat/register.mvc", 
+            data={
+                "username": username,
+                "password": "Learning123",
+                "matchingPassword": "Learning123",
+                "agree": "agree"
+            },
+            name="/WebGoat/register"
+        )
+        
+        # Start session
+        self.client.get("/WebGoat/start.mvc", name="/WebGoat/start")
+    
+    @task(10)
+    def browse_home(self):
+        """Just browse the homepage"""
+        self.client.get("/WebGoat/start.mvc", name="/WebGoat/home")
+    
+    @task(8)
+    def view_lesson_menu(self):
+        """View lesson categories - NO lesson interaction"""
+        categories = [
+            "/WebGoat/start.mvc#lesson/HttpBasics.lesson",
+            "/WebGoat/start.mvc#lesson/Introduction.lesson",
+            "/WebGoat/start.mvc#lesson/General.lesson",
+            "/WebGoat/start.mvc#lesson/ClientSide.lesson",
+        ]
+        self.client.get(random.choice(categories), name="/WebGoat/lesson-category")
+    
+    @task(5)
+    def check_user_profile(self):
+        """Check user profile"""
+        self.client.get("/WebGoat/service/user.mvc", name="/WebGoat/user-profile")
+    
+    @task(3)
+    def view_progress(self):
+        """View learning progress"""
+        self.client.get("/WebGoat/service/lessonoverview.mvc", name="/WebGoat/progress")
+    
+    @task(3)
+    def view_statistics(self):
+        """View statistics page"""
+        self.client.get("/WebGoat/service/statistics.mvc", name="/WebGoat/stats")
+    
+    @task(5)
+    def static_resources(self):
+        """Load static resources"""
+        resources = [
+            "/WebGoat/css/main.css",
+            "/WebGoat/images/logos/webgoat.png",
+            "/WebGoat/js/goatApp/goatApp.js",
+            "/WebGoat/plugins/bootstrap/css/bootstrap.min.css",
+            "/WebGoat/favicon.ico"
+        ]
+        self.client.get(random.choice(resources), name="/WebGoat/static")
+    
+    @task(2)
+    def scoreboard_check(self):
+        """Check scoreboard (if exists)"""
+        self.client.get("/WebGoat/service/scoreboard.mvc", name="/WebGoat/scoreboard")
+    
+    @task(1)
+    def about_page(self):
+        """View about page"""
+        self.client.get("/WebGoat/about.mvc", name="/WebGoat/about")
+    
+    # NO SQL INJECTION
+    # NO XSS PAYLOADS  
+    # NO PATH TRAVERSAL
+    # NO XXE
+    # NO AUTH BYPASS
+    # PURE NAVIGATION ONLY
+
+
+class WebGoatUser(HttpUser):
+    host = "http://localhost:8083"
+    wait_time = between(1, 3)  # Slower, more natural browsing
+    tasks = [WebGoatUserBehavior]

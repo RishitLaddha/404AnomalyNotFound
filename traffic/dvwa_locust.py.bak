@@ -1,0 +1,120 @@
+from locust import HttpUser, task, between, SequentialTaskSet
+import random
+import string
+
+class DVWAUserBehavior(SequentialTaskSet):
+    """Realistic DVWA user journey with authentication"""
+    
+    def on_start(self):
+        """Login at the start of user session"""
+        # Get login page first
+        self.client.get("/login.php")
+        
+        # Perform login
+        self.client.post("/login.php", data={
+            "username": "admin",
+            "password": "password",
+            "Login": "Login"
+        })
+        
+        # Set security level to low
+        self.client.get("/security.php")
+        self.client.post("/security.php", data={
+            "security": "low",
+            "seclev_submit": "Submit"
+        })
+    
+    @task(5)
+    def browse_vulnerabilities(self):
+        """Browse different vulnerability pages"""
+        vulns = [
+            "/vulnerabilities/brute/",
+            "/vulnerabilities/exec/",
+            "/vulnerabilities/csrf/",
+            "/vulnerabilities/fi/",
+            "/vulnerabilities/sqli/",
+            "/vulnerabilities/sqli_blind/",
+            "/vulnerabilities/upload/",
+            "/vulnerabilities/xss_d/",
+            "/vulnerabilities/xss_r/",
+            "/vulnerabilities/xss_s/",
+        ]
+        self.client.get(random.choice(vulns))
+    
+    @task(3)
+    def interact_with_sql_injection(self):
+        """Benign SQL queries"""
+        user_ids = ["1", "2", "3", "4", "5"]
+        self.client.get(f"/vulnerabilities/sqli/?id={random.choice(user_ids)}&Submit=Submit")
+    
+    @task(3)
+    def interact_with_xss(self):
+        """Benign XSS form submissions"""
+        safe_inputs = ["hello", "test", "user123", "search", "info"]
+        self.client.get(f"/vulnerabilities/xss_r/?name={random.choice(safe_inputs)}")
+    
+    @task(2)
+    def command_execution_page(self):
+        """Visit command execution with safe IPs"""
+        ips = ["127.0.0.1", "8.8.8.8", "1.1.1.1", "192.168.1.1"]
+        self.client.post("/vulnerabilities/exec/", data={
+            "ip": random.choice(ips),
+            "Submit": "Submit"
+        })
+    
+    @task(2)
+    def file_inclusion(self):
+        """Safe file inclusion requests"""
+        files = ["include.php", "file1.php", "file2.php", "file3.php"]
+        self.client.get(f"/vulnerabilities/fi/?page={random.choice(files)}")
+    
+    @task(2)
+    def csrf_get_requests(self):
+        """CSRF page interactions"""
+        passwords = ["newpass123", "password456", "secure789"]
+        self.client.get(f"/vulnerabilities/csrf/?password_new={random.choice(passwords)}&password_conf={random.choice(passwords)}&Change=Change")
+    
+    @task(1)
+    def view_source_code(self):
+        """View source code pages"""
+        vulns = ["brute", "exec", "csrf", "fi", "sqli", "upload", "xss_d", "xss_r", "xss_s"]
+        self.client.get(f"/vulnerabilities/{random.choice(vulns)}/source/")
+    
+    @task(1)
+    def view_help(self):
+        """View help pages"""
+        vulns = ["brute", "exec", "csrf", "fi", "sqli", "upload", "xss_d", "xss_r", "xss_s"]
+        self.client.get(f"/vulnerabilities/{random.choice(vulns)}/help/")
+    
+    @task(1)
+    def browse_instructions(self):
+        """Browse instruction pages"""
+        self.client.get("/instructions.php")
+    
+    @task(1)
+    def view_setup(self):
+        """View setup pages"""
+        self.client.get("/setup.php")
+    
+    @task(1)
+    def view_about(self):
+        """View about page"""
+        self.client.get("/about.php")
+    
+    @task(1)
+    def static_resources(self):
+        """Load static resources"""
+        resources = [
+            "/dvwa/css/main.css",
+            "/dvwa/css/login.css",
+            "/dvwa/images/login_logo.png",
+            "/dvwa/images/logo.png",
+            "/favicon.ico"
+        ]
+        self.client.get(random.choice(resources))
+
+
+class DVWAUser(HttpUser):
+    host = "http://localhost:8081"
+    wait_time = between(0.5, 2)  # Faster traffic generation
+    tasks = [DVWAUserBehavior]
