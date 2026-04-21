@@ -1,0 +1,25 @@
+services:
+  # ── Backend API (FastAPI) ──────────────────────────────────
+  - type: web
+    name: pinnacle-waf-api
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    rootDir: backend
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false          # Set manually in Render dashboard
+      - key: KALI_SERVER_URL
+        value: https://pinnacle-kali.onrender.com
+      - key: RENDER_URL
+        value: https://pinnacle-waf-api.onrender.com
+
+  # ── Kali Docker Server ────────────────────────────────────
+  - type: web
+    name: pinnacle-kali
+    runtime: docker
+    rootDir: kali-server
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: API_PORT
+        value: 5000
