@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.env
+.env.local
+__pycache__/
+*.pyc
+*.pt
+*.pkl
+.DS_Store
+waf.log
+data/parsed/
+data/tokenized/benign_sequences.jsonl
